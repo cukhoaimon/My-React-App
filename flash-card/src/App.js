@@ -1,25 +1,53 @@
-import logo from './logo.svg';
-import './App.css';
+import { useState } from "react";
+import "./App.css";
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+export default function App() {
+    const cardQuestion = [
+        {
+            id: 1,
+            question: "Toi co dep trai ko",
+            answer: "co",
+        },
+        {
+            id: 2,
+            question: "Cu toi co thom ko",
+            answer: "rat thom",
+        },
+        {
+            id: 3,
+            question: "Gà chiên nước mắm",
+            answer: "juicy mọng nước",
+        },
+        {
+            id: 4,
+            question: "Chuối hay bưởi",
+            answer: "đu đủ",
+        },
+        {
+            id: 5,
+            question: "Ai đã đặt tên cho dòng sông?",
+            answer: "tao",
+        },
+    ];
+
+    return (
+        <>
+            <h1>Hello everyan</h1>
+            <div className="container">
+                {cardQuestion.map((card) => (
+                    <Card card={card} id={card.id} />
+                ))}
+            </div>
+        </>
+    );
 }
 
-export default App;
+function Card({ card }) {
+    const [showAns, setDisplay] = useState(false);
+
+    return (
+        <button onClick={() => setDisplay(!showAns)}>
+            {showAns ? card.answer : card.question}
+        </button>
+    );
+}
