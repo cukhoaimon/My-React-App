@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import StarRating from "./StarRating";
 import { Loader } from "./Loader";
+import { useKey } from "./useKey";
 
 export function MovieList({ movies, onSelectMovie }) {
   return (
@@ -30,6 +31,12 @@ export function MovieDetail({ id, onCloseMovie, onAddWatchedMovie }) {
   const [isLoading, setIsLoading] = useState(false);
   const [userRating, sertUserRating] = useState(0);
 
+  const countRef = useRef(0);
+
+  useEffect(() => {
+    if (userRating) countRef.current++;
+  }, [userRating]);
+
   const {
     Title: title,
     Year: year,
@@ -43,19 +50,20 @@ export function MovieDetail({ id, onCloseMovie, onAddWatchedMovie }) {
     Genre: genre,
   } = movie;
 
-  useEffect(() => {
-    function callback(e) {
-      if (e.code === "Escape") {
-        onCloseMovie();
-      }
-    }
-    document.addEventListener("keydown", callback);
+  useKey("Escape", onCloseMovie);
+  // useEffect(() => {
+  //   function callback(e) {
+  //     if (e.code === "Escape") {
+  //       onCloseMovie();
+  //     }
+  //   }
+  //   document.addEventListener("keydown", callback);
 
-    // cleam event
-    return () => {
-      document.removeEventListener("keydown", callback);
-    };
-  }, [onCloseMovie]);
+  //   // cleam event
+  //   return () => {
+  //     document.removeEventListener("keydown", callback);
+  //   };
+  // }, [onCloseMovie]);
 
   useEffect(() => {
     async function getMovieDetail() {
