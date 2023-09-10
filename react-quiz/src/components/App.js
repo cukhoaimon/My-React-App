@@ -4,12 +4,19 @@ import Main from "./Main";
 import Loader from "./Loader";
 import Error from "./Error";
 import StartScreen from "./StartScreen";
+import Question from "./Question";
+import NextButton from "./NextButton";
+import Progress from "./Progress";
+import FinishedScreen from "./FinishedScreen";
 
 const initialState = {
   questions: [],
 
   // loading, error, ready, active, finished
   status: "loading",
+  index: 0,
+  answer: null,
+  points: 0,
 };
 
 function reducer(state, action) {
@@ -20,15 +27,55 @@ function reducer(state, action) {
     case "dataFailed":
       return { ...state, status: "error" };
 
+    case "start":
+      return { ...state, status: "active" };
+
+    case "finished":
+      return { ...state, status: "finished" };
+
+    case "newAnswer":
+      const question = state.questions.at(state.index);
+      const newPoints =
+        action.payload === question.correctOption
+          ? state.points + question.points
+          : state.points;
+
+      return {
+        ...state,
+        answer: action.payload,
+        points: newPoints,
+      };
+
+    case "nextQuestion":
+      return {
+        ...state,
+        answer: null,
+        index: state.index + 1,
+      };
+
+    case "reset":
+      return {
+        ...state,
+        answer: null,
+        points: 0,
+        index: 0,
+        status: "active",
+      };
+
     default:
       throw new Error("Unknow action");
   }
 }
 
 function App() {
-  const [{ questions, status }, dispatch] = useReducer(reducer, initialState);
+  const [state, dispatch] = useReducer(reducer, initialState);
+  const { questions, status, index, answer, points } = state;
 
   const numQuestions = questions.length;
+  const maxPossiblePoints = questions.reduce(
+    (prev, cur) => prev + cur.points,
+    0
+  );
 
   useEffect(function () {
     fetch("http://localhost:8000/questions")
@@ -44,7 +91,40 @@ function App() {
       <Main>
         {status === "loading" && <Loader />}
         {status === "error" && <Error />}
-        {status === "ready" && <StartScreen numQuestions={numQuestions} />}
+        {status === "ready" && (
+          <StartScreen numQuestions={numQuestions} dispatch={dispatch} />
+        )}
+        {status === "active" && (
+          <>
+            <Progress
+              index={index}
+              numQuestions={numQuestions}
+              points={points}
+              maxPossiblePoints={maxPossiblePoints}
+              answer={answer}
+            />
+            <Question
+              question={questions.at(index)}
+              dispatch={dispatch}
+              answer={answer}
+            />
+
+            <NextButton
+              dispatch={dispatch}
+              answer={answer}
+              index={index}
+              numQuestions={numQuestions}
+            />
+          </>
+        )}
+
+        {status === "finished" && (
+          <FinishedScreen
+            points={points}
+            maxPossiblePoints={maxPossiblePoints}
+            dispatch={dispatch}
+          />
+        )}
       </Main>
     </div>
   );
